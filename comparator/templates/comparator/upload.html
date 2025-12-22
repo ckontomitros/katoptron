@@ -1,0 +1,97 @@
+{% extends 'comparator/base.html' %}
+
+{% block title %}Upload Videos - Pose Comparison{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <h1 class="text-center mb-4">
+            <i class="bi bi-cloud-upload"></i> Upload Videos for Comparison
+        </h1>
+        <p class="text-center text-muted mb-4">
+            Upload two videos to compare their poses using AI-powered analysis
+        </p>
+
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-file-earmark-play"></i> Reference Video
+                    </label>
+                    <div class="file-input-wrapper">
+                        <div class="btn-file-input" onclick="document.getElementById('id_video1').click();">
+                            <i class="bi bi-upload" style="font-size: 2rem; color: #667eea;"></i>
+                            <p class="mt-2 mb-0">Click to select video 1</p>
+                            <small class="text-muted">Max 100MB</small>
+                        </div>
+                        {{ form.video1 }}
+                    </div>
+                    <div id="video1-preview" class="mt-2"></div>
+                    {% if form.video1.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.video1.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-file-earmark-play"></i> Comparison Video
+                    </label>
+                    <div class="file-input-wrapper">
+                        <div class="btn-file-input" onclick="document.getElementById('id_video2').click();">
+                            <i class="bi bi-upload" style="font-size: 2rem; color: #667eea;"></i>
+                            <p class="mt-2 mb-0">Click to select video 2</p>
+                            <small class="text-muted">Max 100MB</small>
+                        </div>
+                        {{ form.video2 }}
+                    </div>
+                    <div id="video2-preview" class="mt-2"></div>
+                    {% if form.video2.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.video2.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                    <i class="bi bi-play-circle"></i> Start Comparison
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // File preview handlers
+    document.getElementById('id_video1').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || 'No file selected';
+        document.getElementById('video1-preview').innerHTML = 
+            `<div class="alert alert-info"><i class="bi bi-file-check"></i> ${fileName}</div>`;
+    });
+
+    document.getElementById('id_video2').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || 'No file selected';
+        document.getElementById('video2-preview').innerHTML = 
+            `<div class="alert alert-info"><i class="bi bi-file-check"></i> ${fileName}</div>`;
+    });
+
+    // Form validation
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        const video1 = document.getElementById('id_video1').files[0];
+        const video2 = document.getElementById('id_video2').files[0];
+        
+        if (!video1 || !video2) {
+            e.preventDefault();
+            alert('Please select both videos');
+            return false;
+        }
+        
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').innerHTML = 
+            '<span class="spinner-border spinner-border-sm"></span> Uploading...';
+    });
+</script>
+{% endblock %}

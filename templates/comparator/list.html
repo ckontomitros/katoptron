@@ -1,0 +1,77 @@
+{% extends 'comparator/base.html' %}
+
+{% block title %}Comparison History{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="text-center mb-4">
+            <i class="bi bi-clock-history"></i> Comparison History
+        </h1>
+
+        {% if comparisons %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>ID</th>
+                            <th>Created</th>
+                            <th>Status</th>
+                            <th>Avg Position Diff</th>
+                            <th>Avg Angle Diff</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comp in comparisons %}
+                        <tr>
+                            <td><code>{{ comp.id|truncatechars:13 }}</code></td>
+                            <td>{{ comp.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if comp.status == 'completed' %}bg-success
+                                    {% elif comp.status == 'processing' %}bg-warning
+                                    {% elif comp.status == 'failed' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ comp.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if comp.avg_position_diff %}
+                                    {{ comp.avg_position_diff|floatformat:4 }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if comp.avg_angle_diff %}
+                                    {{ comp.avg_angle_diff|floatformat:2 }}°
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'comparator:detail' comp.id %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> No comparisons yet. 
+                <a href="{% url 'comparator:upload' %}">Upload videos</a> to get started!
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{% url 'comparator:upload' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Comparison
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'comparator/base.html' %}
+
+{% block title %}Comparison Results{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="text-center mb-4">
+            <i class="bi bi-graph-up"></i> Comparison Results
+        </h1>
+        
+        <div class="text-center mb-4">
+            <span class="status-badge badge 
+                {% if comparison.status == 'completed' %}bg-success
+                {% elif comparison.status == 'processing' %}bg-warning
+                {% elif comparison.status == 'failed' %}bg-danger
+                {% else %}bg-secondary{% endif %}">
+                <i class="bi bi-
+                    {% if comparison.status == 'completed' %}check-circle
+                    {% elif comparison.status == 'processing' %}hourglass-split
+                    {% elif comparison.status == 'failed' %}x-circle
+                    {% else %}clock{% endif %}"></i>
+                {{ comparison.get_status_display }}
+            </span>
+        </div>
+
+        {% if comparison.status == 'processing' or comparison.status == 'pending' %}
+            <div class="spinner-wrapper">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Processing videos... This may take several minutes.</p>
+                <div class="progress mt-3" style="max-width: 500px; margin: 0 auto;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        {% elif comparison.status == 'failed' %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>Processing Failed:</strong> {{ comparison.error_message }}
+            </div>
+        {% elif comparison.status == 'completed' %}
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ comparison.total_aligned_pairs }}</div>
+                        <div class="stat-label">Aligned Frames</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ comparison.avg_position_diff|floatformat:4 }}</div>
+                        <div class="stat-label">Avg Position Diff</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ comparison.avg_angle_diff|floatformat:2 }}°</div>
+                        <div class="stat-label">Avg Angle Diff</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ comparison.dtw_position_distance|floatformat:2 }}</div>
+                        <div class="stat-label">DTW Distance</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Video -->
+            {% if comparison.comparison_video %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="bi bi-play-btn"></i> Comparison Video</h5>
+                </div>
+                <div class="card-body text-center">
+                    <video controls class="video-preview" style="max-width: 800px;">
+                        <source src="{{ comparison.comparison_video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p class="text-muted mt-2">
+                        <small>Red skeleton: Reference | Green skeleton: Comparison | Yellow dots: High differences</small>
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Download Results -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-download"></i> Download Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if comparison.result_json %}
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ comparison.result_json.url }}" class="btn btn-outline-primary w-100" download>
+                                <i class="bi bi-file-earmark-code"></i> JSON Results
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if comparison.result_csv %}
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ comparison.result_csv.url }}" class="btn btn-outline-primary w-100" download>
+                                <i class="bi bi-file-earmark-spreadsheet"></i> Frame CSV
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if comparison.landmark_csv %}
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ comparison.landmark_csv.url }}" class="btn btn-outline-primary w-100" download>
+                                <i class="bi bi-file-earmark-spreadsheet"></i> Landmark CSV
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if comparison.joint_csv %}
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ comparison.joint_csv.url }}" class="btn btn-outline-primary w-100" download>
+                                <i class="bi bi-file-earmark-spreadsheet"></i> Joint CSV
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if comparison.summary_txt %}
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ comparison.summary_txt.url }}" class="btn btn-outline-primary w-100" download>
+                                <i class="bi bi-file-earmark-text"></i> Summary TXT
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if comparison.comparison_video %}
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ comparison.comparison_video.url }}" class="btn btn-outline-primary w-100" download>
+                                <i class="bi bi-file-earmark-play"></i> Video
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Info -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="bi bi-info-circle"></i> Analysis Info</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Created:</strong> {{ comparison.created_at|date:"Y-m-d H:i:s" }}</p>
+                            <p><strong>Completed:</strong> {{ comparison.completed_at|date:"Y-m-d H:i:s" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>DTW Position Distance:</strong> {{ comparison.dtw_position_distance|floatformat:4 }}</p>
+                            <p><strong>DTW Angle Distance:</strong> {{ comparison.dtw_angle_distance|floatformat:4 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{% url 'comparator:upload' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Comparison
+            </a>
+            <a href="{% url 'comparator:list' %}" class="btn btn-secondary">
+                <i class="bi bi-list"></i> View History
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if comparison.status == 'processing' or comparison.status == 'pending' %}
+<script>
+    // Auto-refresh status every 5 seconds
+    setInterval(function() {
+        fetch("{% url 'comparator:status' comparison.id %}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'completed' || data.status === 'failed') {
+                    location.reload();
+                }
+            });
+    }, 5000);
+</script>
+{% endif %}
+{% endblock %}
