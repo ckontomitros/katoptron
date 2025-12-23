@@ -68,13 +68,13 @@
     // File preview handlers
     document.getElementById('id_video1').addEventListener('change', function(e) {
         const fileName = e.target.files[0]?.name || 'No file selected';
-        document.getElementById('video1-preview').innerHTML = 
+        document.getElementById('video1-preview').innerHTML =
             `<div class="alert alert-info"><i class="bi bi-file-check"></i> ${fileName}</div>`;
     });
 
     document.getElementById('id_video2').addEventListener('change', function(e) {
         const fileName = e.target.files[0]?.name || 'No file selected';
-        document.getElementById('video2-preview').innerHTML = 
+        document.getElementById('video2-preview').innerHTML =
             `<div class="alert alert-info"><i class="bi bi-file-check"></i> ${fileName}</div>`;
     });
 
@@ -82,15 +82,15 @@
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
         const video1 = document.getElementById('id_video1').files[0];
         const video2 = document.getElementById('id_video2').files[0];
-        
+
         if (!video1 || !video2) {
             e.preventDefault();
             alert('Please select both videos');
             return false;
         }
-        
+
         document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerHTML = 
+        document.getElementById('submitBtn').innerHTML =
             '<span class="spinner-border spinner-border-sm"></span> Uploading...';
     });
 </script>

@@ -76,13 +76,21 @@
                     <h5><i class="bi bi-play-btn"></i> Comparison Video</h5>
                 </div>
                 <div class="card-body text-center">
-                    <video controls class="video-preview" style="max-width: 800px;">
+                    <video id="comparisonVideo" controls class="video-preview" style="max-width: 800px;">
                         <source src="{{ comparison.comparison_video.url }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
+                    <div id="videoError" class="alert alert-warning mt-3" style="display: none;">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Video playback issue detected.</strong><br>
+                        Your browser may not support the video codec. Please download the video to view it in a media player.
+                    </div>
                     <p class="text-muted mt-2">
                         <small>Red skeleton: Reference | Green skeleton: Comparison | Yellow dots: High differences</small>
                     </p>
+                    <a href="{{ comparison.comparison_video.url }}" class="btn btn-sm btn-outline-primary mt-2" download>
+                        <i class="bi bi-download"></i> Download Video
+                    </a>
                 </div>
             </div>
             {% endif %}

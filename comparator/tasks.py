@@ -418,8 +418,25 @@ class PoseComparator:
         width = int(cap2.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap2.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        writer = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'),
-                                 fps, (width, height))
+        # Use H264 codec for better browser compatibility
+        # Try different codecs in order of preference
+        fourcc_options = [
+            cv2.VideoWriter_fourcc(*'avc1'),  # H.264
+            cv2.VideoWriter_fourcc(*'H264'),  # H.264 alternative
+            cv2.VideoWriter_fourcc(*'X264'),  # H.264 alternative
+            cv2.VideoWriter_fourcc(*'mp4v'),  # MPEG-4 fallback
+        ]
+
+        writer = None
+        for fourcc in fourcc_options:
+            temp_writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+            if temp_writer.isOpened():
+                writer = temp_writer
+                break
+            temp_writer.release()
+
+        if writer is None:
+            raise RuntimeError("Could not initialize video writer with any codec")
 
         pos_path = results['dtw_path']
         _, idx1 = self.normalize_landmarks(landmarks1)
