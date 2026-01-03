@@ -369,52 +369,6 @@ Change model in the API call to: "gpt-4o"
 Add to comparator/views.py:
 """
 
-def comparison_detail(request, comparison_id):
-    """Enhanced comparison view with OpenAI tennis analysis"""
-    comparison = get_object_or_404(Comparison, id=comparison_id)
-    
-    context = {
-        'comparison': comparison,
-        'tennis_analysis': None,
-    }
-    
-    if comparison.status == 'completed' and comparison.landmark_csv:
-        try:
-            # Load landmark data
-            import pandas as pd
-            from .tennis_analyzer import TennisForehandAnalyzer
-            
-            df = pd.read_csv(comparison.landmark_csv.path)
-            landmark_stats = df.set_index('landmark_name').to_dict('index')
-            
-            # Prepare comparison data
-            comparison_data = {
-                'avg_position_diff': comparison.avg_position_diff,
-                'avg_angle_diff': comparison.avg_angle_diff,
-                'total_aligned_pairs': comparison.total_aligned_pairs,
-            }
-            
-            # Generate OpenAI analysis
-            analyzer = TennisForehandAnalyzer()
-            result = analyzer.generate_tennis_analysis(
-                comparison_data,
-                landmark_stats
-            )
-            
-            if result['success']:
-                context['tennis_analysis'] = result['analysis']
-                # Optionally log token usage
-                print(f"Tokens used: {result.get('tokens_used', 0)}")
-            else:
-                print(f"Analysis error: {result.get('error')}")
-                context['tennis_analysis'] = result.get('analysis', {})
-            
-        except Exception as e:
-            print(f"Error generating tennis analysis: {e}")
-            import traceback
-            traceback.print_exc()
-    
-    return render(request, 'comparator/tennis_results.html', context)
 
 
 # ============================================================================
