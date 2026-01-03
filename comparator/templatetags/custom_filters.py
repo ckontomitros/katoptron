@@ -110,3 +110,12 @@ def format_metric(value, metric_type='position'):
             return f"{val:.2f}"
     except (ValueError, TypeError):
         return "N/A"
+@register.filter
+def risk_icon(risk_level):
+    """Return Bootstrap icon name based on risk level"""
+    icons = {
+        'high': 'exclamation-triangle-fill',
+        'medium': 'exclamation-circle-fill',
+        'low': 'info-circle-fill',
+    }
+    return icons.get(risk_level, 'info-circle-fill')

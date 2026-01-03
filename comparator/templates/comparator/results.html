@@ -1,82 +1,109 @@
 {% extends 'comparator/base.html' %}
+{% load custom_filters %}
 
-{% block title %}Comparison Results{% endblock %}
+{% block title %}Tennis Forehand Analysis{% endblock %}
 
 {% block extra_css %}
 <style>
-    .insight-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .coach-card {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         color: white;
         border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
-    .insight-card h4 {
-        font-size: 1.3rem;
-        margin-bottom: 15px;
-        border-bottom: 2px solid rgba(255,255,255,0.3);
-        padding-bottom: 10px;
-    }
-    .insight-item {
-        background: rgba(255,255,255,0.1);
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 10px;
+    .coach-section {
+        background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
-    }
-    .score-circle {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        font-size: 2.5rem;
-        font-weight: bold;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
-    .score-excellent { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-    .score-good { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-    .score-fair { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-    .score-poor { background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%); }
-    .body-part-card {
-        border-left: 4px solid #667eea;
-        padding: 15px;
-        margin-bottom: 10px;
-        background: #f8f9fa;
-        border-radius: 5px;
-    }
-    .recommendation-box {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
+        border-radius: 10px;
         padding: 20px;
-        border-radius: 8px;
-        margin: 20px 0;
+        margin-bottom: 20px;
     }
-    .metric-badge {
+    .skill-badge {
         display: inline-block;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+    }
+    .skill-beginner { background: #ffc107; color: #000; }
+    .skill-intermediate { background: #17a2b8; color: #fff; }
+    .skill-advanced { background: #28a745; color: #fff; }
+
+    .issue-card {
+        background: white;
+        border-left: 5px solid #dc3545;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        color: #333;
+    }
+    .issue-high { border-left-color: #dc3545; }
+    .issue-medium { border-left-color: #ffc107; }
+    .issue-low { border-left-color: #28a745; }
+
+    .drill-card {
+        background: #f8f9fa;
+        border: 2px solid #667eea;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+    .drill-phase {
+        background: #667eea;
+        color: white;
         padding: 5px 15px;
         border-radius: 20px;
         font-size: 0.9rem;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    .strength-badge {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        display: inline-block;
         margin: 5px;
+        font-weight: 500;
     }
-    .badge-excellent { background: #38ef7d; color: #fff; }
-    .badge-good { background: #4facfe; color: #fff; }
-    .badge-fair { background: #fee140; color: #333; }
-    .badge-poor { background: #fc4a1a; color: #fff; }
-    .progress-custom {
-        height: 25px;
-        border-radius: 10px;
-        background: #e9ecef;
+    .practice-timeline {
+        position: relative;
+        padding-left: 40px;
     }
-    .chart-container {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    .practice-timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(to bottom, #667eea, #764ba2);
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 30px;
+    }
+    .timeline-dot {
+        position: absolute;
+        left: -32px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #667eea;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px #667eea;
+    }
+    .ai-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: inline-block;
     }
 </style>
 {% endblock %}
@@ -84,387 +111,282 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <h1 class="text-center mb-4">
-            <i class="bi bi-graph-up"></i> Movement Analysis Report
-        </h1>
-
         <div class="text-center mb-4">
-            <span class="status-badge badge
-                {% if comparison.status == 'completed' %}bg-success
-                {% elif comparison.status == 'processing' %}bg-warning
-                {% elif comparison.status == 'failed' %}bg-danger
-                {% else %}bg-secondary{% endif %}">
-                <i class="bi bi-
-                    {% if comparison.status == 'completed' %}check-circle
-                    {% elif comparison.status == 'processing' %}hourglass-split
-                    {% elif comparison.status == 'failed' %}x-circle
-                    {% else %}clock{% endif %}"></i>
-                {{ comparison.get_status_display }}
+            <h1><i class="bi bi-trophy"></i> Tennis Forehand Analysis</h1>
+            <span class="ai-badge">
+                <i class="bi bi-stars"></i> AI-Powered Coaching
             </span>
         </div>
 
-        {% if comparison.status == 'processing' or comparison.status == 'pending' %}
-            <div class="spinner-wrapper">
-                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-3">Analyzing your movements... This may take several minutes.</p>
-                <div class="progress mt-3" style="max-width: 500px; margin: 0 auto;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated"
-                         role="progressbar" style="width: 100%"></div>
-                </div>
+        {% if comparison.status == 'completed' and tennis_analysis %}
+
+        <!-- Overall Assessment -->
+        <div class="coach-card">
+            <div class="text-center">
+                <h3><i class="bi bi-person-badge"></i> Coach's Assessment</h3>
+                {% if tennis_analysis.skill_level %}
+                <span class="skill-badge skill-{{ tennis_analysis.skill_level }}">
+                    {{ tennis_analysis.skill_level|title }} Level
+                </span>
+                {% endif %}
             </div>
 
-        {% elif comparison.status == 'failed' %}
-            <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle"></i>
-                <strong>Analysis Failed:</strong> {{ comparison.error_message }}
+            <div class="coach-section mt-4">
+                <h5><i class="bi bi-chat-quote"></i> Overall Analysis</h5>
+                <p class="lead">{{ tennis_analysis.overall_assessment }}</p>
             </div>
+        </div>
 
-        {% elif comparison.status == 'completed' %}
+        <!-- Critical Issues -->
+        {% if tennis_analysis.critical_issues %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Critical Issues to Address</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">These issues are affecting your shot quality the most:</p>
 
-            <!-- Overall Similarity Score -->
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="card shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <h3 class="mb-4">Overall Movement Similarity</h3>
-                            <div class="row align-items-center">
-                                <div class="col-md-4">
-                                    {% load custom_filters %}
-                                    {% with score=comparison.avg_position_diff|calculate_similarity_score %}
-                                    <div class="score-circle score-{{ score.category }}">
-                                        {{ score.percentage }}%
-                                        <small style="font-size: 0.8rem; display: block; margin-top: -5px;">Similar</small>
-                                    </div>
-                                    <p class="mt-3 mb-0"><strong>{{ score.label }}</strong></p>
-                                    {% endwith %}
-                                </div>
-                                <div class="col-md-8 text-start">
-                                    <h5 class="mb-3">What does this mean?</h5>
-                                    <p class="mb-2">
-                                        {% if comparison.avg_position_diff < 0.05 %}
-                                            <i class="bi bi-check-circle-fill text-success"></i>
-                                            <strong>Excellent Match!</strong> Your movements are nearly identical to the reference.
-                                            Your form and technique are highly consistent.
-                                        {% elif comparison.avg_position_diff < 0.10 %}
-                                            <i class="bi bi-check-circle text-primary"></i>
-                                            <strong>Good Match!</strong> Your movements closely follow the reference with minor variations.
-                                            Small improvements in specific areas could enhance performance.
-                                        {% elif comparison.avg_position_diff < 0.20 %}
-                                            <i class="bi bi-exclamation-circle text-warning"></i>
-                                            <strong>Moderate Match.</strong> There are noticeable differences in your movement patterns.
-                                            Focus on the highlighted areas for improvement.
-                                        {% else %}
-                                            <i class="bi bi-x-circle text-danger"></i>
-                                            <strong>Significant Differences.</strong> Your movements differ substantially from the reference.
-                                            Review the detailed analysis to identify key areas for correction.
-                                        {% endif %}
-                                    </p>
-                                </div>
-                            </div>
+                {% for issue in tennis_analysis.critical_issues %}
+                <div class="issue-card issue-{{ issue.injury_risk|default:'medium' }}">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="text-danger mb-2">
+                                <i class="bi bi-{{ issue.injury_risk|default:'medium'|risk_icon }}"></i>
+                                {{ issue.issue }}
+                            </h6>
+                            <p class="mb-1"><strong>Impact on Performance:</strong> {{ issue.impact }}</p>
+                            {% if issue.injury_risk != 'low' %}
+                            <p class="mb-0 text-warning">
+                                <i class="bi bi-shield-exclamation"></i>
+                                <strong>Injury Risk:</strong> {{ issue.injury_risk|title }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-{{ issue.injury_risk|default:'warning' }} fs-6">
+                                Priority: {{ issue.injury_risk|title|default:'Medium' }}
+                            </span>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
+        </div>
+        {% endif %}
 
-            <!-- Key Insights -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="insight-card">
-                        <h4><i class="bi bi-lightbulb"></i> Key Insights</h4>
+        <!-- Technical Recommendations -->
+        {% if tennis_analysis.technical_recommendations %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-tools"></i> Technical Corrections & Drills</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">Phase-by-phase breakdown with specific drills:</p>
 
-                        <div class="insight-item">
-                            <strong><i class="bi bi-rulers"></i> Position Accuracy:</strong>
-                            <span class="float-end">
-                                {{ comparison.avg_position_diff|floatformat:3 }}
-                                <span class="metric-badge badge-{% if comparison.avg_position_diff < 0.05 %}excellent{% elif comparison.avg_position_diff < 0.10 %}good{% elif comparison.avg_position_diff < 0.20 %}fair{% else %}poor{% endif %}">
-                                    {% if comparison.avg_position_diff < 0.05 %}Excellent
-                                    {% elif comparison.avg_position_diff < 0.10 %}Good
-                                    {% elif comparison.avg_position_diff < 0.20 %}Needs Work
-                                    {% else %}Poor{% endif %}
-                                </span>
-                            </span>
-                            <div class="progress progress-custom mt-2">
-                                {% with normalized_diff=comparison.avg_position_diff|multiply:500|add:0|floatformat:0 %}
-                                {% with capped_diff=normalized_diff|default:100 %}
-                                <div class="progress-bar bg-{% if capped_diff < 25 %}success{% elif capped_diff < 50 %}info{% elif capped_diff < 75 %}warning{% else %}danger{% endif %}"
-                                     style="width: {{ capped_diff }}%"></div>
-                                {% endwith %}
-                                {% endwith %}
-                            </div>
-                            <small class="text-light d-block mt-1">Lower is better - measures how closely body positions match</small>
-                        </div>
+                {% for rec in tennis_analysis.technical_recommendations %}
+                <div class="drill-card">
+                    <span class="drill-phase">{{ rec.phase|title }}</span>
 
-                        <div class="insight-item">
-                            <strong><i class="bi bi-compass"></i> Joint Angle Accuracy:</strong>
-                            <span class="float-end">
-                                {{ comparison.avg_angle_diff|floatformat:1 }}°
-                                <span class="metric-badge badge-{% if comparison.avg_angle_diff < 10 %}excellent{% elif comparison.avg_angle_diff < 20 %}good{% elif comparison.avg_angle_diff < 30 %}fair{% else %}poor{% endif %}">
-                                    {% if comparison.avg_angle_diff < 10 %}Excellent
-                                    {% elif comparison.avg_angle_diff < 20 %}Good
-                                    {% elif comparison.avg_angle_diff < 30 %}Needs Work
-                                    {% else %}Poor{% endif %}
-                                </span>
-                            </span>
-                            <div class="progress progress-custom mt-2">
-                                {% with normalized_angle=comparison.avg_angle_diff|multiply:2|add:0|floatformat:0 %}
-                                {% with capped_angle=normalized_angle|default:100 %}
-                                <div class="progress-bar bg-{% if capped_angle < 25 %}success{% elif capped_angle < 50 %}info{% elif capped_angle < 75 %}warning{% else %}danger{% endif %}"
-                                     style="width: {{ capped_angle }}%"></div>
-                                {% endwith %}
-                                {% endwith %}
-                            </div>
-                            <small class="text-light d-block mt-1">Lower is better - measures how closely joint angles match</small>
-                        </div>
+                    <h6 class="mt-2 text-danger">
+                        <i class="bi bi-x-circle"></i> Problem: {{ rec.problem }}
+                    </h6>
 
-                        <div class="insight-item">
-                            <strong><i class="bi bi-film"></i> Frames Analyzed:</strong>
-                            <span class="float-end">{{ comparison.total_aligned_pairs }} frame pairs</span>
-                        </div>
+                    <h6 class="mt-3 text-success">
+                        <i class="bi bi-check-circle"></i> Correction: {{ rec.correction }}
+                    </h6>
+
+                    <div class="alert alert-light mt-3 mb-0">
+                        <strong><i class="bi bi-lightbulb"></i> Recommended Drill:</strong>
+                        <p class="mb-0 mt-2">{{ rec.drill }}</p>
                     </div>
                 </div>
+                {% endfor %}
             </div>
+        </div>
+        {% endif %}
 
-            <!-- Recommendations -->
-            {% if comparison.avg_position_diff > 0.10 or comparison.avg_angle_diff > 20 %}
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="recommendation-box">
-                        <h5><i class="bi bi-star-fill"></i> Recommended Focus Areas</h5>
-                        <ul class="mb-0">
-                            {% if comparison.avg_angle_diff > 25 %}
-                            <li><strong>Joint Angles:</strong> Your joint angles differ significantly. Focus on bending angles at elbows, knees, and shoulders to match the reference form.</li>
-                            {% endif %}
-                            {% if comparison.avg_position_diff > 0.15 %}
-                            <li><strong>Body Positioning:</strong> Work on overall body position and posture throughout the movement.</li>
-                            {% endif %}
-                            <li><strong>Practice Tip:</strong> Watch the comparison video below frame-by-frame to identify specific moments where form breaks down.</li>
-                            <li><strong>Next Steps:</strong> Download the detailed CSV reports to see which specific body parts need the most attention.</li>
+        <!-- Strengths -->
+        {% if tennis_analysis.strengths %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-star-fill"></i> Your Strengths - Keep These!</h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="text-muted mb-3">These aspects of your forehand are solid:</p>
+                {% for strength in tennis_analysis.strengths %}
+                <span class="strength-badge">
+                    <i class="bi bi-check-circle-fill"></i> {{ strength }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Practice Plan -->
+        {% if tennis_analysis.practice_plan %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-calendar-check"></i> Your Personalized Practice Plan</h5>
+            </div>
+            <div class="card-body">
+                <div class="practice-timeline">
+                    <!-- Immediate Focus -->
+                    {% if tennis_analysis.practice_plan.immediate %}
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <h6 class="text-primary">
+                            <i class="bi bi-calendar-week"></i> This Week - Immediate Focus
+                        </h6>
+                        <ul class="mt-2">
+                            {% for item in tennis_analysis.practice_plan.immediate %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
                         </ul>
                     </div>
+                    {% endif %}
+
+                    <!-- Medium Term -->
+                    {% if tennis_analysis.practice_plan.medium_term %}
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="background: #764ba2; box-shadow: 0 0 0 3px #764ba2;"></div>
+                        <h6 class="text-primary">
+                            <i class="bi bi-calendar-month"></i> This Month - Build Consistency
+                        </h6>
+                        <ul class="mt-2">
+                            {% for item in tennis_analysis.practice_plan.medium_term %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <!-- Progression -->
+                    {% if tennis_analysis.practice_plan.progression %}
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="background: #38ef7d; box-shadow: 0 0 0 3px #38ef7d;"></div>
+                        <h6 class="text-success">
+                            <i class="bi bi-arrow-up-circle"></i> Progression Path
+                        </h6>
+                        <p class="mt-2">{{ tennis_analysis.practice_plan.progression }}</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
-            {% endif %}
+        </div>
+        {% endif %}
 
-            <!-- Comparison Video -->
-            {% if comparison.comparison_video %}
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-play-btn"></i> Side-by-Side Visual Analysis</h5>
+        <!-- Coaching Notes -->
+        {% if tennis_analysis.coaching_notes %}
+        <div class="alert alert-info">
+            <h6><i class="bi bi-info-circle"></i> Additional Coaching Notes:</h6>
+            <p class="mb-0">{{ tennis_analysis.coaching_notes }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Comparison Video -->
+        {% if comparison.comparison_video %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-play-btn"></i> Visual Analysis</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="alert alert-info">
+                    <strong><i class="bi bi-info-circle"></i> Watch Your Technique:</strong><br>
+                    <span class="badge bg-danger me-2">Red Skeleton</span> Professional Reference<br>
+                    <span class="badge bg-success me-2">Green Skeleton</span> Your Forehand<br>
+                    <span class="badge bg-warning me-2">Yellow Dots</span> Areas Needing Work
                 </div>
-                <div class="card-body text-center">
-                    <div class="alert alert-info">
-                        <strong><i class="bi bi-info-circle"></i> How to read this video:</strong><br>
-                        <span class="badge bg-danger me-2">Red Skeleton</span> Reference/Correct Form<br>
-                        <span class="badge bg-success me-2">Green Skeleton</span> Your Performance<br>
-                        <span class="badge bg-warning me-2">Yellow Dots</span> Areas with Largest Differences
-                    </div>
 
-                    <video id="comparisonVideo" controls class="video-preview" style="max-width: 100%; height: auto;">
-                        <source src="{{ comparison.comparison_video.url }}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    <div id="videoError" class="alert alert-warning mt-3" style="display: none;">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <strong>Video playback issue detected.</strong><br>
-                        Your browser may not support the video codec. Please download the video to view it in a media player like VLC.
-                    </div>
+                <video id="comparisonVideo" controls class="video-preview" style="max-width: 100%; height: auto;">
+                    <source src="{{ comparison.comparison_video.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
 
-                    <div class="mt-3">
-                        <a href="{{ comparison.comparison_video.url }}" class="btn btn-primary" download>
-                            <i class="bi bi-download"></i> Download Video
+                <div class="mt-3">
+                    <button class="btn btn-outline-primary" onclick="document.getElementById('comparisonVideo').playbackRate = 0.25">
+                        <i class="bi bi-speedometer"></i> 0.25x (Frame-by-frame)
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="document.getElementById('comparisonVideo').playbackRate = 0.5">
+                        <i class="bi bi-speedometer"></i> 0.5x (Slow)
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="document.getElementById('comparisonVideo').playbackRate = 1.0">
+                        <i class="bi bi-speedometer2"></i> Normal
+                    </button>
+                    <a href="{{ comparison.comparison_video.url }}" class="btn btn-primary" download>
+                        <i class="bi bi-download"></i> Download
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Download Detailed Data -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-arrow-down"></i> Detailed Data</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if comparison.landmark_csv %}
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ comparison.landmark_csv.url }}" class="btn btn-outline-primary w-100" download>
+                            <i class="bi bi-file-spreadsheet"></i> Body Part Data (CSV)
                         </a>
-                        <button class="btn btn-outline-secondary" onclick="document.getElementById('comparisonVideo').playbackRate = 0.5">
-                            <i class="bi bi-speedometer"></i> 0.5x Speed
-                        </button>
-                        <button class="btn btn-outline-secondary" onclick="document.getElementById('comparisonVideo').playbackRate = 1.0">
-                            <i class="bi bi-speedometer2"></i> Normal Speed
-                        </button>
                     </div>
+                    {% endif %}
+                    {% if comparison.joint_csv %}
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ comparison.joint_csv.url }}" class="btn btn-outline-primary w-100" download>
+                            <i class="bi bi-diagram-3"></i> Joint Angles (CSV)
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if comparison.summary_txt %}
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ comparison.summary_txt.url }}" class="btn btn-outline-primary w-100" download>
+                            <i class="bi bi-file-text"></i> Summary Report (TXT)
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
-            {% endif %}
+        </div>
 
-            <!-- Detailed Body Part Analysis (from CSV data) -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-body-text"></i> Body Part Breakdown</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">Areas ranked by difference from reference (highest to lowest):</p>
+        <!-- Action Buttons -->
+        <div class="text-center mb-5">
+            <a href="{% url 'comparator:upload' %}" class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-arrow-clockwise"></i> Analyze Another Forehand
+            </a>
+            <a href="{% url 'comparator:list' %}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-clock-history"></i> View History
+            </a>
+        </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Upper Body</h6>
-                            <div class="body-part-card">
-                                <i class="bi bi-circle-fill text-warning"></i> <strong>Left Shoulder</strong>
-                                <span class="float-end text-muted">High Priority</span>
-                            </div>
-                            <div class="body-part-card">
-                                <i class="bi bi-circle-fill text-info"></i> <strong>Right Elbow</strong>
-                                <span class="float-end text-muted">Medium Priority</span>
-                            </div>
-                            <div class="body-part-card">
-                                <i class="bi bi-circle-fill text-success"></i> <strong>Wrists</strong>
-                                <span class="float-end text-muted">Good Match</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Lower Body</h6>
-                            <div class="body-part-card">
-                                <i class="bi bi-circle-fill text-danger"></i> <strong>Left Knee</strong>
-                                <span class="float-end text-muted">Critical</span>
-                            </div>
-                            <div class="body-part-card">
-                                <i class="bi bi-circle-fill text-warning"></i> <strong>Right Hip</strong>
-                                <span class="float-end text-muted">High Priority</span>
-                            </div>
-                            <div class="body-part-card">
-                                <i class="bi bi-circle-fill text-success"></i> <strong>Ankles</strong>
-                                <span class="float-end text-muted">Good Match</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-light mt-3">
-                        <i class="bi bi-info-circle"></i>
-                        <strong>Tip:</strong> Download the detailed CSV files below to see exact measurements for each body part and frame.
-                    </div>
-                </div>
+        {% elif comparison.status == 'processing' %}
+        <div class="text-center p-5">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
+            <p class="mt-3">Analyzing your forehand technique... This may take a few minutes.</p>
+        </div>
 
-            <!-- Download Detailed Reports -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-download"></i> Download Detailed Reports</h5>
-                </div>
-                <div class="card-body">
-                    <p class="mb-3">Get the complete data for deeper analysis:</p>
-                    <div class="row">
-                        {% if comparison.result_csv %}
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-file-earmark-spreadsheet" style="font-size: 3rem; color: #28a745;"></i>
-                                    <h6 class="mt-2">Frame-by-Frame Data</h6>
-                                    <p class="small text-muted">Complete comparison for every frame</p>
-                                    <a href="{{ comparison.result_csv.url }}" class="btn btn-sm btn-success w-100" download>
-                                        <i class="bi bi-download"></i> Download CSV
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if comparison.landmark_csv %}
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-person-arms-up" style="font-size: 3rem; color: #007bff;"></i>
-                                    <h6 class="mt-2">Body Part Statistics</h6>
-                                    <p class="small text-muted">Average differences per landmark</p>
-                                    <a href="{{ comparison.landmark_csv.url }}" class="btn btn-sm btn-primary w-100" download>
-                                        <i class="bi bi-download"></i> Download CSV
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if comparison.joint_csv %}
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-diagram-3" style="font-size: 3rem; color: #ffc107;"></i>
-                                    <h6 class="mt-2">Joint Angle Data</h6>
-                                    <p class="small text-muted">Angle measurements for all joints</p>
-                                    <a href="{{ comparison.joint_csv.url }}" class="btn btn-sm btn-warning w-100" download>
-                                        <i class="bi bi-download"></i> Download CSV
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if comparison.summary_txt %}
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-file-earmark-text" style="font-size: 3rem; color: #6c757d;"></i>
-                                    <h6 class="mt-2">Summary Report</h6>
-                                    <p class="small text-muted">Quick overview in text format</p>
-                                    <a href="{{ comparison.summary_txt.url }}" class="btn btn-sm btn-secondary w-100" download>
-                                        <i class="bi bi-download"></i> Download TXT
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if comparison.result_json %}
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-code-square" style="font-size: 3rem; color: #17a2b8;"></i>
-                                    <h6 class="mt-2">Complete Data (JSON)</h6>
-                                    <p class="small text-muted">All results in structured format</p>
-                                    <a href="{{ comparison.result_json.url }}" class="btn btn-sm btn-info w-100" download>
-                                        <i class="bi bi-download"></i> Download JSON
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
-                    <h5 class="mb-3">What's Next?</h5>
-                    <a href="{% url 'comparator:upload' %}" class="btn btn-primary btn-lg me-2">
-                        <i class="bi bi-plus-circle"></i> Compare New Videos
-                    </a>
-                    <a href="{% url 'comparator:list' %}" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-clock-history"></i> View Past Comparisons
-                    </a>
-                </div>
-            </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+            Analysis not available yet or failed to generate.
+        </div>
         {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-{% if comparison.status == 'processing' or comparison.status == 'pending' %}
 <script>
+{% if comparison.status == 'processing' %}
+    // Auto-refresh every 5 seconds
     setInterval(function() {
-        fetch("{% url 'comparator:status' comparison.id %}")
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'completed' || data.status === 'failed') {
-                    location.reload();
-                }
-            });
+        location.reload();
     }, 5000);
-</script>
 {% endif %}
-{% if comparison.comparison_video %}
-<script>
-    const video = document.getElementById('comparisonVideo');
-    const errorDiv = document.getElementById('videoError');
-
-    video.addEventListener('error', function(e) {
-        errorDiv.style.display = 'block';
-    });
-
-    setTimeout(function() {
-        if (video.readyState === 0) {
-            errorDiv.style.display = 'block';
-        }
-    }, 2000);
 </script>
-{% endif %}
 {% endblock %}

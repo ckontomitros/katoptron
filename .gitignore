@@ -1,0 +1,10 @@
+/.idea
+katoptron/__pycache__/
+katoptron/data/__pycache__/
+comparator/__pycache__/
+venv/
+media/
+.env
+db.sqlite3
+comparator/migrations/__pycache__/
+comparator/templatetags/__pycache__/
