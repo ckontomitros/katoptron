@@ -1,6 +1,6 @@
 # Katoptron – AI Tennis Forehand Analyzer
 
-Σύγκριση τεχνικής **forehand** τένις με επαγγελματία αναφορά  
+Σύγκριση τεχνικής **forehand** τένις με επαγγελματία   
 → MediaPipe Pose + DTW + **GPT-4o** προπονητική ανάλυση
 
 
