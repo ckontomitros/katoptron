@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katoptron - AI Tennis Coaching</title>
+    <style>
+        @media print {
+            .slide {
+                display: block !important;
+                position: relative !important;
+                page-break-after: always;
+            }
+
+            .controls, .slide-counter, .progress-container {
+                display: none;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            padding: 60px 80px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Slide 1 - Title */
+        .slide-1 {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide-1 h1 {
+            font-size: 4.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .slide-1 .subtitle {
+            font-size: 2em;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .slide-1 .author {
+            font-size: 1.5em;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+
+        /* Slide 2 - Motivation */
+        .slide-2 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Slide 3 - What it does */
+        .slide-3 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        /* Slide 4 - Demo */
+        .slide-4 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        /* Slide 5 - Architecture */
+        .slide-5 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        /* Slide 6 - Tech Stack */
+        .slide-6 {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        /* Slide 7 - Data Flow */
+        .slide-7 {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        /* Slide 8 - Core Innovation */
+        .slide-8 {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+
+        .slide-8 h2, .slide-8 h3 {
+            color: #333;
+        }
+
+        /* Slide 9 - Results */
+        .slide-9 {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #333;
+        }
+
+        .slide-9 h2, .slide-9 h3 {
+            color: #333;
+        }
+
+        /* Slide 10 - Visual Results */
+        .slide-10 {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+
+        .slide-10 h2 {
+            color: #333;
+        }
+
+        /* Slide 11 - Challenges */
+        .slide-11 {
+            background: linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%);
+        }
+
+        /* Slide 12 - Future Work */
+        .slide-12 {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+        }
+
+        /* Slide 13 - Lessons */
+        .slide-13 {
+            background: linear-gradient(135deg, #f8b500 0%, #fceabb 100%);
+            color: #333;
+        }
+
+        .slide-13 h2, .slide-13 h3 {
+            color: #333;
+        }
+
+        /* Slide 14 - Thank You */
+        .slide-14 {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 2.8em;
+            margin-bottom: 35px;
+            border-bottom: 4px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 2em;
+            margin: 25px 0 15px 0;
+            font-weight: 600;
+        }
+
+        p, li {
+            font-size: 1.4em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            margin-left: 50px;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+            font-size: 1.3em;
+        }
+
+        td {
+            font-size: 1.2em;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button:disabled:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: none;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            font-size: 1.3em;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            white-space: pre;
+            font-size: 1.15em;
+            border-left: 4px solid rgba(255, 255, 255, 0.5);
+            overflow-x: auto;
+        }
+
+        .highlight {
+            background: rgba(255, 255, 0, 0.4);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 25px 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .bullet-point {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .bullet-point::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .visual-placeholder {
+            background: rgba(0, 0, 0, 0.3);
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 80px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.5em;
+            font-style: italic;
+        }
+
+        .legend {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+            font-size: 1.3em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .red {
+            background: #ff4444;
+        }
+
+        .green {
+            background: #44ff44;
+        }
+
+        .yellow {
+            background: #ffff44;
+        }
+
+        .video-wrapper {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        video {
+            width: 100%;
+            display: block;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+<body>
+<div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="slide-counter" id="counter">1 / 14</div>
+
+<div class="controls">
+    <button id="prevBtn" onclick="changeSlide(-1)" disabled>← Prev</button>
+    <button id="nextBtn" onclick="changeSlide(1)">Next →</button>
+</div>
+
+<div class="slide slide-1 active">
+    <h1>🎾 Katoptron</h1>
+    <div class="subtitle">AI-Powered Forehand Technique Analyzer</div>
+    <div class="subtitle" style="font-size: 1.5em;">Pose Comparison & AI Tennis Coaching Tool</div>
+    <div class="author">Christos Kontomitros · January 2026</div>
+</div>
+
+<div class="slide slide-2">
+    <h2>💡 Motivation / Problem</h2>
+    <div class="content">
+        <div class="bullet-point">Many amateur tennis players want professional-level feedback</div>
+        <div class="bullet-point">Hiring a coach is expensive & time-consuming</div>
+        <div class="bullet-point">Existing apps are expensive or not tennis-specific</div>
+        <div style="margin-top: 50px; padding: 30px; background: rgba(255,255,255,0.2); border-radius: 15px; border-left: 5px solid #fff;">
+            <h3 style="margin: 0;">🎯 Goal</h3>
+            <p style="font-size: 1.5em; margin-top: 15px;">Affordable, upload-any-video, AI-driven forehand analysis</p>
+        </div>
+    </div>
+</div>
+
+<div class="slide slide-3">
+    <h2>⚡ User Journey</h2>
+    <div class="content">
+        <div class="grid-2">
+            <div class="card"><h3>1. Upload Pro</h3>
+                <p>Upload a reference video of ideal technique.</p></div>
+            <div class="card"><h3>2. Upload Self</h3>
+                <p>Upload your own forehand clip.</p></div>
+            <div class="card"><h3>3. AI Alignment</h3>
+                <p>MediaPipe + DTW aligns the two movements perfectly.</p></div>
+            <div class="card"><h3>4. Get Coaching</h3>
+                <p>Receive a red/green skeleton overlay and LLM report.</p></div>
+        </div>
+    </div>
+</div>
+
+<div class="slide slide-4">
+    <h2>🎬 Live Demo</h2>
+    <div class="content">
+        <div class="video-wrapper">
+            <video id="demoVideo" controls>
+                <source src="presentation.mov" type="video/quicktime">
+                <source src="presentation.mov" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="grid-2" style="margin-top: 20px;">
+            <div class="card"><strong>📊 Stats Cards</strong>
+                <p>Real-time metrics</p></div>
+            <div class="card"><strong>🤖 LLM Analysis</strong>
+                <p>The "AI Brain" feedback</p></div>
+        </div>
+    </div>
+</div>
+
+<div class="slide slide-5">
+    <h2>🏗️ High-Level Architecture</h2>
+    <div class="content">
+        <div class="code-block">
+            Browser (JS) → Django 6.0 → Celery (Worker)
+            MediaPipe (Pose) → tslearn (Alignment) → GPT-4o
+            Results → JSON/Video → User Browser
+        </div>
+    </div>
+</div>
+
+<div class="slide slide-6">
+    <h2>🛠️ Technology Stack</h2>
+    <div class="content">
+        <table>
+            <tr>
+                <th>Layer</th>
+                <th>Tech</th>
+            </tr>
+            <tr>
+                <td>Backend</td>
+                <td>Django 6.0 + Redis + Celery</td>
+            </tr>
+            <tr>
+                <td>AI/Vision</td>
+                <td>MediaPipe, OpenCV, tslearn</td>
+            </tr>
+            <tr>
+                <td>LLM</td>
+                <td>OpenAI GPT-4o (Structured Output)</td>
+            </tr>
+            <tr>
+                <td>Frontend</td>
+                <td>Bootstrap 5 + Custom CSS Animations</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="slide slide-7">
+    <h2>🔄 The AI Pipeline</h2>
+    <div class="content">
+        <div class="bullet-point"><strong>Pose Extraction:</strong> 33 3D landmarks via MediaPipe.</div>
+        <div class="bullet-point"><strong>Normalization:</strong> Scaling coordinates to be distance-invariant.</div>
+        <div class="bullet-point"><strong>DTW Alignment:</strong> Non-linear time warping to sync different speeds.
+        </div>
+        <div class="bullet-point"><strong>LLM Synthesis:</strong> Converting raw joint data into "Tennis English."</div>
+    </div>
+</div>
+
+<div class="slide slide-8">
+    <h2>🚀 The AI "Tennis Brain"</h2>
+    <div class="content">
+        <div class="card">
+            <h3>Structured LLM Reasoning</h3>
+            <p>We don't just show numbers. GPT-4o interprets variances to detect:</p>
+            <ul>
+                <li><strong>Injury Risk:</strong> Early detection of "tennis elbow" mechanics.</li>
+                <li><strong>Phase Specifics:</strong> Feedback on Unit Turn, Contact Point, and Follow-through.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="slide slide-9">
+    <h2>📊 Results - Quantitative</h2>
+    <div class="content">
+        <div class="grid-2">
+            <div class="card"><h3 style="color:#1e3c72">DTW Score</h3>
+                <p style="font-size:2em">8.92</p></div>
+            <div class="card"><h3 style="color:#1e3c72">Avg Angle Diff</h3>
+                <p style="font-size:2em">17.4°</p></div>
+        </div>
+        <div class="code-block" style="color:#333">Top Faults: [right_elbow, right_shoulder, left_knee]</div>
+    </div>
+</div>
+
+<div class="slide slide-10">
+    <h2>🎨 Visual Feedback Results</h2>
+    <div class="content" style="justify-content: flex-start; padding-top: 10px;">
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color red"></div>
+                Pro Reference
+            </div>
+            <div class="legend-item">
+                <div class="legend-color green"></div>
+                User Attempt
+            </div>
+        </div>
+        <div class="media-wrapper">
+            <img src="img.png" alt="Skeleton comparison overlay showing professional vs amateur technique"
+                 class="slide-media">
+        </div>
+        <div style="text-align: center; margin-top: 15px; font-style: italic; opacity: 0.8;">
+            Visualizing the exact moment of impact and follow-through deviation.
+        </div>
+    </div>
+</div>
+
+<div class="slide slide-11">
+    <h2>⚠️ Challenges & Solutions</h2>
+    <div class="content">
+        <div class="bullet-point"><strong>Challenge:</strong> Slow processing → <strong>Solution:</strong> Celery Async
+            Tasks.
+        </div>
+        <div class="bullet-point"><strong>Challenge:</strong> Video Codecs → <strong>Solution:</strong> FFmpeg
+            auto-transcoding.
+        </div>
+        <div class="bullet-point"><strong>Challenge:</strong> Perspective Bias → <strong>Solution:</strong> 3D
+            coordinate normalization.
+        </div>
+    </div>
+</div>
+
+<div class="slide slide-12">
+    <h2>🔮 Future Roadmap</h2>
+    <div class="content">
+        <div class="grid-2">
+            <div class="card"><h3>Short Term</h3>
+                <ul>
+                    <li>Backhand Support</li>
+                    <li>Mobile App</li>
+                </ul>
+            </div>
+            <div class="card"><h3>Long Term</h3>
+                <ul>
+                    <li>Racket Tracking (YOLO)</li>
+                    <li>Multi-angle Analysis</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide slide-13">
+    <h2>💡 Lessons Learned</h2>
+    <div class="content">
+        <div class="bullet-point">Structured JSON from LLMs is more useful than prose.</div>
+        <div class="bullet-point">User Experience hinges on background processing visibility.</div>
+        <div class="bullet-point">Simple math (DTW) often beats complex black-box models.</div>
+    </div>
+</div>
+
+<div class="slide slide-14">
+    <h1>Thank You!</h1>
+    <p>Questions?</p>
+    <p style="opacity: 0.7; font-size: 1em;">Katoptron · 2026</p>
+</div>
+
+<style>
+    .progress-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        z-index: 2000;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: #4facfe;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+</style>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('counter');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateSlides() {
+        slides.forEach((s, i) => {
+            s.classList.toggle('active', i === currentSlide);
+        });
+
+        // Update Counter & Progress
+        counter.innerText = `${currentSlide + 1} / ${slides.length}`;
+        const progress = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = progress + '%';
+
+        // Button States
+        prevBtn.disabled = (currentSlide === 0);
+        nextBtn.disabled = (currentSlide === slides.length - 1);
+    }
+
+    function changeSlide(direction) {
+        currentSlide = Math.max(0, Math.min(slides.length - 1, currentSlide + direction));
+        updateSlides();
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "ArrowRight" || e.key === " ") changeSlide(1);
+        if (e.key === "ArrowLeft") changeSlide(-1);
+    });
+
+    updateSlides();
+</script>
+</body>
